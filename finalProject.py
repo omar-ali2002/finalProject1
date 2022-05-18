@@ -83,35 +83,33 @@ def compute_SSE(clusters):
 
 def assign_cluster(tweets, centroids):
     clusters = dict()
-
     for t in range(len(tweets)):
         
         dist=list()
-        min_dis = math.inf # initial value
         cluster_id = -1 # initial value
         
         for c in range(len(centroids)): # will iterate on all centroids --> compare tweet with each centroid
             
             dis = calculateDistance(centroids[c], tweets[t]) # distance will be less than inf for sure
-            if centroids[c] == tweets[t]:
-                cluster_id = c
-                min_dis = 0
-                break #----> if error is here then remove break statements
+            dist.append(dis)
             
-            if dis < min_dis:
-                cluster_id = c
-                min_dis = dis
-            # dist.append(dis)
+        dist.sort()
+        if dist[0]==0:
+            cluster_id=c
             
+                
+        if dist[0]>0 and dist[0]<1:
+            cluster_id=c
             
-        if min_dis == 1: # tweet and centroid are completely different then put it in any cluster
+       
+        if dist[0]==1:
             cluster_id = rd.randint(0, len(centroids) - 1)
         
-        clusters.setdefault(cluster_id, []).append([tweets[t]])    #if cluster_id doesnot exist then put [] and append [tweets[t]] in it
-        last_tweet_id = len(clusters.setdefault(cluster_id, [])) - 1
+        
+        clusters.setdefault(cluster_id, []).append([tweets[t]])    # if cluster_id doesnot exist then put [] and append [tweets[t]] in it
         # add the tweet distance to compute sse in the end
-        clusters.setdefault(cluster_id, [])[last_tweet_id].append(min_dis)
-    
+        last_tweet_id = len(clusters.setdefault(cluster_id, [])) - 1
+        clusters.setdefault(cluster_id, [])[last_tweet_id].append(dist[0])
     return clusters
 
 def update_centroids(clusters):
@@ -135,10 +133,10 @@ def update_centroids(clusters):
                 idx = x 
                 
         centroids.append(clusters[key][idx][0])
-    #print(centroids)
+        
     return centroids
 
-def k_means(tweets, k=3, maxit=50):
+def k_means(tweets, k=4, maxit=50):
     currentCentroids = []
     
     getRandomPoints(currentCentroids, k)
@@ -156,7 +154,7 @@ def k_means(tweets, k=3, maxit=50):
             check = True
         
         for c in range(len(currentCentroids)):
-            if currentCentroids[c] != previousCentroids[c]:  # "".join(["Omar","Ali","Yassin"]) --> Omaraliyassin
+            if currentCentroids[c] != previousCentroids[c]:  
                 check = True
                 
         if check == False:
@@ -185,4 +183,4 @@ for e in range(5): ## default number of experiments to be performed
     print('\n')
     print("*"*5)
     k = k + 1
-#print(clusters)
+
