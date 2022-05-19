@@ -85,31 +85,34 @@ def assign_cluster(tweets, centroids):
     clusters = dict()
     for t in range(len(tweets)):
         
-        dist=list()
+        # dist=list()
+        min_dis=math.inf
         cluster_id = -1 # initial value
         
         for c in range(len(centroids)): # will iterate on all centroids --> compare tweet with each centroid
             
             dis = calculateDistance(centroids[c], tweets[t]) # distance will be less than inf for sure
-            dist.append(dis)
+            if centroids[c] == tweets[t]:
+                cluster_id = c
+                min_dis = 0
+                break #----> if error is here then remove break statements
             
-        dist.sort()
-        if dist[0]==0:
-            cluster_id=c
+            if dis < min_dis:
+                cluster_id = c
+                min_dis = dis
+            # dist.append(dis)
             
-                
-        if dist[0]>0 and dist[0]<1:
-            cluster_id=c
             
-       
-        if dist[0]==1:
+        if min_dis == 1: # tweet and centroid are completely different then put it in any cluster
             cluster_id = rd.randint(0, len(centroids) - 1)
         
         
         clusters.setdefault(cluster_id, []).append([tweets[t]])    # if cluster_id doesnot exist then put [] and append [tweets[t]] in it
         # add the tweet distance to compute sse in the end
         last_tweet_id = len(clusters.setdefault(cluster_id, [])) - 1
-        clusters.setdefault(cluster_id, [])[last_tweet_id].append(dist[0])
+        clusters.setdefault(cluster_id, [])[last_tweet_id].append(min_dis)
+        
+        
     return clusters
 
 def update_centroids(clusters):
@@ -133,10 +136,9 @@ def update_centroids(clusters):
                 idx = x 
                 
         centroids.append(clusters[key][idx][0])
-        
     return centroids
 
-def k_means(tweets, k=4, maxit=50):
+def k_means(tweets, k=3, maxit=30):
     currentCentroids = []
     
     getRandomPoints(currentCentroids, k)
@@ -182,5 +184,6 @@ for e in range(5): ## default number of experiments to be performed
     print("SSE : " + str(error))
     print('\n')
     print("*"*5)
-    k = k + 1
+    # k = k + 1
+
 
